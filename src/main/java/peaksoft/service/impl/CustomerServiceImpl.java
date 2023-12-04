@@ -37,7 +37,6 @@ public class CustomerServiceImpl implements CustomerService {
         user.setName(customer.getName());
         user.setSurname(customer.getSurname());
         user.setPassword(userRepo.generatePassword());
-        user.setUsername(userRepo.generateUsername(customer.getName(),customer.getSurname()));
         userRepo.save(user);
 
         Customer customer1 = Customer.builder()

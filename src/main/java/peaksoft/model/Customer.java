@@ -21,20 +21,9 @@ public class Customer {
     @OneToOne(cascade = CascadeType.ALL)
     private User user;
 
-//    public Customer(long id, String email, int age, User user) {
-//        this.id = id;
-//        this.email = email;
-//        this.age = age;
-//        this.user = user;
-//    }
 
     public Customer() {
 
     }
 
-    public Customer(int age,String email,User user) {
-        this.age = age;
-        this.email = email;
-        this.user = user;
-    }
 }

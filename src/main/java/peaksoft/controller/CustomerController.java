@@ -1,6 +1,7 @@
 package peaksoft.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.CustomerRequest;
 import peaksoft.dto.CustomerResponse;
@@ -13,14 +14,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/customer")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ADMIN')")
 public class CustomerController {
 
     private final CustomerService customerService;
+
 
     @GetMapping
     public List<CustomerResponse> getAllCustomers(){
         return customerService.getAllCustomers();
     }
+
 
     @PostMapping("/create")
     public UserDto save(@RequestBody CustomerRequest customer){

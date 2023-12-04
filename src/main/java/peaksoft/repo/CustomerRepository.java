@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface CustomerRepository  extends JpaRepository<Customer, Long> {
 
-    @Query("select new peaksoft.dto.CustomerResponse(c.id,c.email,c.age,c.user.username)  from Customer c")
+    @Query("select new peaksoft.dto.CustomerResponse(c.id,c.email,c.age)  from Customer c")
     List<CustomerResponse> findAllCustomers();
 
 
