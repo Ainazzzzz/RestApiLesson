@@ -14,13 +14,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/customer")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class CustomerController {
 
     private final CustomerService customerService;
 
 
-    @GetMapping
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/all")
     public List<CustomerResponse> getAllCustomers(){
         return customerService.getAllCustomers();
     }
