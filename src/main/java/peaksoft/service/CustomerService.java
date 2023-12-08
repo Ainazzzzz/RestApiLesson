@@ -1,16 +1,13 @@
 package peaksoft.service;
 
-import peaksoft.dto.CustomerRequest;
-import peaksoft.dto.CustomerResponse;
-import peaksoft.dto.SimpleResponse;
-import peaksoft.dto.UserDto;
+import peaksoft.dto.*;
 import peaksoft.model.Customer;
 
 import java.util.List;
 
 public interface CustomerService {
 
-    List<CustomerResponse> getAllCustomers();
+    PaginationResponse getAllCustomers(int page, int size);
     UserDto saveCustomer(CustomerRequest customer);
 
     String update(long id, CustomerRequest customer);
@@ -18,6 +15,5 @@ public interface CustomerService {
     CustomerResponse getById(long id);
 
     SimpleResponse delete(long id);
-
 
 }

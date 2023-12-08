@@ -1,12 +1,11 @@
 package peaksoft.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
-import peaksoft.dto.CustomerRequest;
-import peaksoft.dto.CustomerResponse;
-import peaksoft.dto.SimpleResponse;
-import peaksoft.dto.UserDto;
+import peaksoft.dto.*;
 import peaksoft.service.CustomerService;
 
 import java.util.List;
@@ -14,32 +13,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/customer")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ADMIN')")
+@Tag(name = "Customers")
 public class CustomerController {
 
     private final CustomerService customerService;
 
-
-    @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("/all")
-    public List<CustomerResponse> getAllCustomers(){
-        return customerService.getAllCustomers();
+    @GetMapping
+    public PaginationResponse getAllCustomers(@RequestParam int page,@RequestParam int size){
+        return customerService.getAllCustomers(page,size);
     }
 
-
-    @PostMapping("/create")
-    public UserDto save(@RequestBody CustomerRequest customer){
+    @PostMapping
+    public UserDto save(@RequestBody @Valid CustomerRequest customer){
         return customerService.saveCustomer(customer);
     }
 
     @DeleteMapping("/{id}")
-    public SimpleResponse delete(@PathVariable  long id){
+    public SimpleResponse delete(@PathVariable long id){
         return customerService.delete(id);
 
     }
 
-    @PutMapping("/update/{id}")
-    public void update(@PathVariable long id,@RequestBody CustomerRequest customer){
+    @PutMapping("/{id}")
+    public void update(@PathVariable long id,@RequestBody @Valid CustomerRequest customer){
         customerService.update(id,customer);
     }
 

@@ -1,13 +1,16 @@
 package peaksoft.service.impl;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import peaksoft.dto.CustomerRequest;
-import peaksoft.dto.CustomerResponse;
-import peaksoft.dto.SimpleResponse;
-import peaksoft.dto.UserDto;
+import peaksoft.dto.*;
+import peaksoft.exceptions.AlreadyExistsException;
+import peaksoft.exceptions.NotFoundException;
 import peaksoft.model.Customer;
 import peaksoft.model.User;
 import peaksoft.repo.CustomerRepository;
@@ -20,23 +23,33 @@ import java.util.NoSuchElementException;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
-    @Autowired
-    private CustomerRepository customerRepository;
-    @Autowired
-    private UserService userRepo;
+
+    private final CustomerRepository customerRepository;
+
+    private final UserRepo userRepo;
+    private final UserService userService;
     @Override
-    public List<CustomerResponse> getAllCustomers()
-    {
-        return customerRepository.findAllCustomers();
+    public PaginationResponse getAllCustomers(int page, int size){
+       Pageable pageable = PageRequest.of(page-1,size);
+      Page<CustomerResponse> customerResponses= customerRepository.findAllCustomers(pageable);
+      return PaginationResponse.builder()
+              .customerResponseList(customerResponses.getContent())
+              .totalPages(customerResponses.getTotalPages())
+              .totalElements(customerResponses.getTotalElements())
+              .build();
     }
 
     @Override
     public UserDto saveCustomer(CustomerRequest customer) {
+        if(userRepo.existsByEmail(customer.getEmail())){
+            throw new AlreadyExistsException("Customer with such email already exists");
+        }
         User user = new User();
         user.setName(customer.getName());
         user.setSurname(customer.getSurname());
-        user.setPassword(userRepo.generatePassword());
+        user.setPassword(userService.generatePassword());
         userRepo.save(user);
 
         Customer customer1 = Customer.builder()
@@ -54,7 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public String update(long id, CustomerRequest customer) {
      Customer customer1 = customerRepository.findById(id).orElseThrow(
-             ()-> new NoSuchElementException
+             ()-> new NotFoundException
                      (String.format("Customer with such and id %d doesnt exist",id)));
      customer1.setAge(customer.getAge());
      customer1.getUser().setName(customer.getName());
@@ -66,22 +79,25 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResponse getById(long id) {
        Customer customer = customerRepository.findById(id).orElseThrow(
-                ()-> new NoSuchElementException
+                ()-> new NotFoundException
                         (String.format("Customer with such and id %d doesnt exist",id)));
     return new CustomerResponse(
-//            customer.getId(),
-//            customer.getUser().getName(),
-//            customer.getUser().getSurname(),
-//            customer.getEmail(),
-//            customer.getAge(),
-//            customer.getUser().getPassword(),
-//            customer.getUser().getUsername()
+            customer.getId(),
+            customer.getUser().getName(),
+            customer.getUser().getSurname(),
+            customer.getEmail(),
+            customer.getAge(),
+            customer.getUser().getPassword()
     );
     }
 
     @Override
     public SimpleResponse delete(long id) {
+        if (!customerRepository.existsById(id)) {
+            throw new NotFoundException(String.format("Customer with such and id %d doesnt exist", id));
+        }
         customerRepository.deleteById(id);
         return new SimpleResponse("Customer with id " + id + " successfully deleted", HttpStatus.OK);
     }
+
 }
